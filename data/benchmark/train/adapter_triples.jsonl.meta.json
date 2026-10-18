@@ -1,0 +1,9 @@
+{
+ "description": "the same 2,627 rows with the detector's Z span (z_query) and a label; the exclusion adapter trains on them",
+ "builder": "excise.label_z",
+ "rows": 2627,
+ "sha256": "6900a6606fc3a91981778133a127cb3335918c4b22a0b7f4a00890263973645c",
+ "records": [
+  "data/benchmark/train/adapter_triples_unlabelled.jsonl"
+ ]
+}

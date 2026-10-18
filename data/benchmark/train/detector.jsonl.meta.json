@@ -1,0 +1,7 @@
+{
+ "description": "12,871 queries with the X and Z spans the detector is trained to tag",
+ "builder": "the X-BENCH construction pipeline",
+ "rows": 12871,
+ "sha256": "12031299b5ce099ab3d35ec1430f3a1fcd9621ae3938915a1f6e9d4fb6ac948f",
+ "records": []
+}

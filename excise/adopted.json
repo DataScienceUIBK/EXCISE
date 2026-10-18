@@ -1,0 +1,99 @@
+{
+ "generated_from": "checkpoint args + thr.txt",
+ "operator": [
+  "--soft-demote",
+  "--lam 0.97",
+  "--two-stage",
+  "--ts-floor 0.35",
+  "--anomaly-gate",
+  "--anomaly-sigma 0.5",
+  "--faithful",
+  "--topk 100",
+  "--hard1",
+  "--hard-auto",
+  "--hard-guard",
+  "--hard-guard-rule top_rel",
+  "--hard-frac 0.6",
+  "--hard-cap 3"
+ ],
+ "backbones": {
+  "reason": {
+   "hf_backbone": "lightonai/Reason-ModernColBERT",
+   "adapter": {
+    "checkpoint": "adapter_reason",
+    "lr": 0.001,
+    "z_margin": 0.1,
+    "z_weight": 5.0,
+    "epochs": 3.0,
+    "lora_r": 8,
+    "batch_size": 16,
+    "seed": 0
+   },
+   "detector": {
+    "checkpoint": "detector_reason",
+    "lr": 0.001,
+    "epochs": 3,
+    "bs": 32,
+    "lora_r": 8,
+    "pos_weight": 8.0,
+    "xz": true,
+    "iob": true,
+    "tap": "proj128",
+    "seed": 0,
+    "tau": "0.70"
+   }
+  },
+  "gte": {
+   "hf_backbone": "lightonai/GTE-ModernColBERT-v1",
+   "adapter": {
+    "checkpoint": "adapter_gte",
+    "lr": 0.001,
+    "z_margin": 0.1,
+    "z_weight": 5.0,
+    "epochs": 3.0,
+    "lora_r": 8,
+    "batch_size": 16,
+    "seed": 0
+   },
+   "detector": {
+    "checkpoint": "detector_gte",
+    "lr": 0.001,
+    "epochs": 3,
+    "bs": 32,
+    "lora_r": 8,
+    "pos_weight": 8.0,
+    "xz": true,
+    "iob": true,
+    "tap": "proj128",
+    "seed": 0,
+    "tau": "0.70"
+   }
+  },
+  "colbertv2": {
+   "hf_backbone": "colbert-ir/colbertv2.0",
+   "adapter": {
+    "checkpoint": "adapter_colbertv2",
+    "lr": 0.001,
+    "z_margin": 0.1,
+    "z_weight": 2.0,
+    "epochs": 3.0,
+    "lora_r": 8,
+    "batch_size": 16,
+    "seed": 0
+   },
+   "detector": {
+    "checkpoint": "detector_colbertv2",
+    "lr": 0.0005,
+    "epochs": 3,
+    "bs": 32,
+    "lora_r": 8,
+    "pos_weight": 8.0,
+    "xz": true,
+    "iob": true,
+    "tap": "proj128",
+    "seed": 0,
+    "tau": "0.70"
+   }
+  }
+ }
+}

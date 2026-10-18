@@ -1,0 +1,10 @@
+# weights and corpora are fetched with scripts/download.py, never committed
+model/
+*.pt
+*.safetensors
+data/datasets/
+# scratch
+data/out/
+logs/
+__pycache__/
+*.pyc

@@ -1,0 +1,37 @@
+cff-version: 1.2.0
+title: "EXCISE: Query-Side Exclusion for Late-Interaction Retrieval"
+message: "If you use this software, the benchmark, or the released checkpoints, please cite the paper."
+type: software
+authors:
+  - family-names: Ali
+    given-names: Mohammed
+    affiliation: "University of Innsbruck"
+  - family-names: Abdallah
+    given-names: Abdelrahman
+    affiliation: "University of Innsbruck"
+  - family-names: Jatowt
+    given-names: Adam
+    affiliation: "University of Innsbruck"
+repository-code: "https://github.com/MohammedAli9330/EXCISE"
+license: MIT
+abstract: >-
+  A frozen late-interaction index scores every query token by its best document match at the same
+  sign, so naming what a user does not want promotes it. EXCISE detects the excluded topic, re-embeds
+  only the shortlist at query time, and subtracts a penalty on that topic. The index is never rebuilt.
+keywords:
+  - information retrieval
+  - late interaction
+  - ColBERT
+  - negation
+  - exclusion
+preferred-citation:
+  type: article
+  title: "EXCISE: Query-Side Exclusion for Late-Interaction Retrieval"
+  authors:
+    - family-names: Ali
+      given-names: Mohammed
+    - family-names: Abdallah
+      given-names: Abdelrahman
+    - family-names: Jatowt
+      given-names: Adam
+  year: 2026

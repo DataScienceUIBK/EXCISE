@@ -1,0 +1,10 @@
+{
+ "description": "1,900 (query, positive, negative) retrieval triples from the training records; every trainable system trains on them",
+ "builder": "excise.build_train",
+ "rows": 1900,
+ "sha256": "b83ecacf1cf370dc33440da86dcf026e4b083b95c4546ba4438aca29db10ea31",
+ "records": [
+  "data/benchmark/train/excluir.jsonl",
+  "data/benchmark/train/fiqa.jsonl"
+ ]
+}

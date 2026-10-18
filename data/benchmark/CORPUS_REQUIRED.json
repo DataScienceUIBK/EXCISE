@@ -1,0 +1,47 @@
+{
+ "note": "The corpora X-BENCH retrieves against, one corpus.jsonl per collection under data/datasets/. scripts/download.py fetches them and checks each against the sha256 here; ExcluIR document ids are positional, so a different file would repoint every gold.",
+ "datasets": {
+  "edgar": {
+   "role": "zero-shot OOD",
+   "file": "corpus.jsonl",
+   "n": 676925,
+   "bytes": 1962749666,
+   "sha256": "7fbafd6ba8e115eae973399462fcd65dd29d30d9cd7a22d4c4d50b8094d3a54f"
+  },
+  "esgenius": {
+   "role": "zero-shot OOD",
+   "file": "corpus.jsonl",
+   "n": 995,
+   "bytes": 6681786,
+   "sha256": "a521db477c1ea5a2d0bf410ede5cc6042466ab16fdbfbcb23ffdfa39172b6970"
+  },
+  "eurlex": {
+   "role": "zero-shot OOD",
+   "file": "corpus.jsonl",
+   "n": 322938,
+   "bytes": 684094155,
+   "sha256": "7665d5fe93c9feb661c967a22f458f88b5cb7e213984f2eebf5d80e838f893de"
+  },
+  "excluir": {
+   "role": "in-domain",
+   "file": "corpus.jsonl",
+   "n": 90406,
+   "bytes": 42305531,
+   "sha256": "8366fab74a3f9e085f04d184c32f0f9fe8e0caa554a229990c2266a3f11e217f"
+  },
+  "fiqa": {
+   "role": "in-domain",
+   "file": "corpus.jsonl",
+   "n": 57638,
+   "bytes": 91925850,
+   "sha256": "764df34922af5f3da490d81f188f00c157ebc4c63f80b9a91375a68a5dab8925"
+  },
+  "trec-covid": {
+   "role": "zero-shot OOD",
+   "file": "corpus.jsonl",
+   "n": 171332,
+   "bytes": 393406952,
+   "sha256": "3b8f8f20b843f22d81bd47c040cc8800dc814221b6d3dcbf29c941aa5f01ea27"
+  }
+ }
+}

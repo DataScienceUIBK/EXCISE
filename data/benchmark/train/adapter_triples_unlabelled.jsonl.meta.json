@@ -1,0 +1,10 @@
+{
+ "description": "the 1,900 retrieval triples plus 727 demotion triples (Z, excluded document, gold) from the same records",
+ "builder": "excise.build_train",
+ "rows": 2627,
+ "sha256": "55b1a8d738b4aea560f0602e5ae9608403352fc0bf189a89e92c7e218956d514",
+ "records": [
+  "data/benchmark/train/excluir.jsonl",
+  "data/benchmark/train/fiqa.jsonl"
+ ]
+}

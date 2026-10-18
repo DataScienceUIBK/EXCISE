@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="150" viewBox="0 0 600 150" role="img" aria-label="EXCISE">
+  <title>EXCISE</title>
+  <g transform="translate(6,8)">
+    <path d="M12,75 H108" stroke="#818CF8" stroke-width="4" stroke-linecap="round"/>
+    <path d="M146,75 H176" stroke="#818CF8" stroke-width="4" stroke-linecap="round"/>
+    <rect x="18" y="62" width="26" height="26" rx="7" fill="#818CF8"/>
+    <rect x="50" y="62" width="26" height="26" rx="7" fill="#818CF8"/>
+    <rect x="82" y="62" width="26" height="26" rx="7" fill="#818CF8"/>
+    <rect x="114" y="62" width="26" height="26" rx="7" fill="none" stroke="#6E7681" stroke-width="2.5" stroke-dasharray="4 3"/>
+    <path d="M109,93 L145,57" stroke="#F87171" stroke-width="5" stroke-linecap="round"/>
+    <rect x="146" y="62" width="26" height="26" rx="7" fill="#818CF8"/>
+  </g>
+  <text x="208" y="86" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="66" font-weight="700" letter-spacing="1"><tspan fill="#E6EDF3">EXCISE</tspan></text>
+  <text x="210" y="118" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="18" fill="#9DA7B3">Query-side exclusion for late-interaction retrieval</text>
+</svg>
