@@ -63,7 +63,7 @@ Pooled exclusion success@10 over the 1,860 test queries (Table 1 of the paper). 
 ## Installation
 
 ```bash
-git clone https://github.com/MohammedAli9330/EXCISE && cd EXCISE
+git clone https://github.com/DataScienceUIBK/EXCISE && cd EXCISE
 pip install -r requirements.txt
 python scripts/download.py --what corpora         # the six collections, 3.2 GB, checked against their sha256  -> data/datasets/
 python scripts/download.py --what checkpoints     # the detectors and adapters, 25 MB  -> model/checkpoints/
