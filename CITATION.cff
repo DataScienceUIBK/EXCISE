@@ -12,7 +12,7 @@ authors:
   - family-names: Jatowt
     given-names: Adam
     affiliation: "University of Innsbruck"
-repository-code: "https://github.com/MohammedAli9330/EXCISE"
+repository-code: "https://github.com/DataScienceUIBK/EXCISE"
 license: MIT
 abstract: >-
   A frozen late-interaction index scores every query token by its best document match at the same
