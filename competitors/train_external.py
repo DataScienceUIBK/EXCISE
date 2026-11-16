@@ -1,7 +1,7 @@
 """Fine-tune an external dense retriever or cross-encoder reranker on the 1,900 retrieval triples, with
 each model's own query and document prefixes.
 
-  python -m competitors.train_external --model bge-rerank --out model/checkpoints/<name>"""
+  python -m competitors.train_external --model bge-rerank --out model/checkpoints/my_bge-rerank"""
 from __future__ import annotations
 import torch
 import argparse, json, os, sys
@@ -11,7 +11,7 @@ from excise import config as C  # noqa: F401  (pins HF caches before any HF impo
 
 from competitors.evaluate_external import MODELS
 
-OUT_ROOT = os.path.join(C.ROOT, "model", "checkpoints", "strong_ft")
+OUT_ROOT = os.path.join(C.ROOT, "model", "checkpoints")
 
 
 def _per_device(bs: int) -> int:
@@ -104,13 +104,13 @@ def main():
     ap.add_argument("--triples", default=C.BASELINE_TRIPLES,
                     help='the 1,900 retrieval triples every trainable system trains on')
     ap.add_argument("--out", default="",
-                    help='checkpoint directory')
+                    help='checkpoint directory (default: model/checkpoints/my_<model>)')
     ap.add_argument("--epochs", type=int, default=3)
     ap.add_argument("--bs", type=int, default=32)
     ap.add_argument("--lr", type=float, default=2e-5)
     a = ap.parse_args()
     m = MODELS[a.model]
-    out = a.out or os.path.join(OUT_ROOT, a.model)
+    out = a.out or os.path.join(OUT_ROOT, "my_" + a.model)
     os.makedirs(out, exist_ok=True)
     triples = load_triples(a.triples)
     print(f"[train_external] model={a.model} mode={m['mode']} triples={len(triples)} from {a.triples}")

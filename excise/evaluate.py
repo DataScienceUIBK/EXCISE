@@ -8,7 +8,7 @@ from collections import defaultdict
 # the repository root, so `config` and the packages import from any working directory
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from excise import config as C
-from excise.metrics import success10, right_rank, ndcg10, ndcg10_excl, difficulty_bin
+from excise.metrics import success10, right_rank, ndcg10, ndcg10_excl
 
 
 def is_excluir_source(source):
@@ -45,8 +45,7 @@ def evaluate(records, id2idx, rank_fn, perquery=None, orders=None):
         if orders is not None:
             orders.append({"id": r.get("id"), "source": r.get("source"), "tier": r.get("tier"),
                            "pos": int(p), "negs": [int(n) for n in negs], "order": [int(d) for d in order[:100]]})
-        for key in ("ALL", f"tier={r.get('tier','?')}", f"ntopics={r.get('n_topics',1)}",
-                    f"len={r.get('length','?')}", f"diff={difficulty_bin(r.get('difficulty'))}"):
+        for key in ("ALL", f"tier={r.get('tier','?')}", f"len={r.get('length','?')}"):
             a = agg[key]; a[0] += suc; a[1] += rr; a[2] += nd; a[3] += rec; a[4] += exc; a[5] += xnd; a[6] += 1
     return agg, skipped
 

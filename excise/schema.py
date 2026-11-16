@@ -1,7 +1,7 @@
 """The X-BENCH record format, the negation cues and the token helpers shared by the detector and the operator."""
 from __future__ import annotations
 import re
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass, asdict
 
 TIERS = ("T1_explicit", "T2_implicit", "T3_complex")
 NEG_TYPES = ("entity", "attribute", "compound")
@@ -17,13 +17,7 @@ class Record:
     pos_id: object                   # corpus id of p (X∈p ∧ Z∉p) — VERBATIM (str or int; never int-coerced)
     neg_ids: list                    # corpus ids of confusable n's, ONE PER Zi: neg_ids[k] holds Z[k]
     length: str = "short"           # short | long
-    n_topics: int = 1
-    neg_type: str = "entity"
-    difficulty: dict = field(default_factory=dict)   # {bm25_gap, colbert_gap}
     source: str = ""                # excluir | trec-covid | fiqa | ...
-    pool: str = ""                  # train | test — STAMPED AT CREATION. A post-hoc audit cannot otherwise
-                                    # distinguish a legitimate train query from a test collision.
-    qc: dict = field(default_factory=dict)           # {gates_passed:[...], judge:{...}, audited:bool, drop_reason:str}
 
     def dict(self):
         return asdict(self)
@@ -62,7 +56,7 @@ def structural_ok(r: Record) -> tuple[bool, str]:
     if len(r.neg_ids) < len(r.Z): return False, "missing_neg_per_Z"
     if len(set(map(str, r.neg_ids))) != len(r.neg_ids): return False, "duplicate_neg_ids"
     if str(r.pos_id) in set(map(str, r.neg_ids)): return False, "pos_in_neg"   # compare as str: 7 vs "7" is one doc
-    if r.neg_type in ("compound", "compound_or") and len(r.Z) < 2: return False, "compound_needs_2Z"
+    if r.tier == "T3_complex" and len(r.Z) < 2: return False, "compound_needs_2Z"
     if len(r.Z) > 1 and len({str(z).strip().lower() for z in r.Z}) != len(r.Z): return False, "duplicate_Z"
     if r.tier == "T1_explicit" and not has_neg_cue(r.query): return False, "explicit_tier_has_no_cue"
     if r.tier == "T2_implicit" and has_neg_cue(r.query): return False, "implicit_tier_has_neg_cue"

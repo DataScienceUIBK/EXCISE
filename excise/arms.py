@@ -111,6 +111,8 @@ def add_arm_args(ap):
                     help='E1 arm ours-frozen-demote: NO per-query re-embed — demote on the frozen candidate embeddings (only query+Z encoded)')
     ap.add_argument("--no-switch-gate", dest="switch_gates_reembed", action="store_false", default=True,
                     help='DISABLE the default Switch-gated re-embed, i.e')
+    ap.add_argument("--first-stage", choices=["index", "frozen"], default="index",
+                    help="with --reindex: encode the first-stage query with the encoder that built the index (index, default) or with the frozen encoder (frozen)")
     ap.add_argument("--reindex", action="store_true",
                     help='build the first-stage index with the tuned encoder (FINE-TUNE baselines only)')
     ap.add_argument("--faithful", action="store_true",
@@ -127,12 +129,12 @@ def resolved_system(a):
                           ("env:EXCISE_FINDER_THR" if os.environ.get("EXCISE_FINDER_THR") else "config-default"),
             "finder_source": "--finder" if "--finder" in sys.argv else
                              ("env:EXCISE_FINDER_CKPT" if os.environ.get("EXCISE_FINDER_CKPT") else "config-default"),
-            "reindex": bool(a.reindex), "faithful": bool(a.faithful),
+            "reindex": bool(a.reindex), "first_stage": str(getattr(a, "first_stage", "index")), "faithful": bool(a.faithful),
             "chunk_words": int(os.environ.get("EXCISE_CHUNK_WORDS", "0")),
             # The DOCUMENT BUDGET: chunk_words alone cannot identify it, and equal-budget comparisons are
             # exactly the case where a cell must prove which budget produced it.
             "max_doc_words": int(os.environ.get("EXCISE_MAX_DOC_WORDS", "0")),
-            "query_len": os.environ.get("EXCISE_QUERY_LEN", ""),
+            "query_len": os.environ.get("EXCISE_QUERY_LEN", ""), "doc_len": os.environ.get("EXCISE_DOC_LEN", ""),
             "sigma": float(a.anomaly_sigma), "lam": (float(a.lam) if a.lam is not None else float(C.DEMOTE_LAM)),
             "ts_floor": float(a.ts_floor), "hard_frac": float(a.hard_frac), "hard_cap": int(a.hard_cap),
             "two_stage": bool(getattr(a, "two_stage", False)),
@@ -268,6 +270,7 @@ def build_method(a):
           f"topk={a.topk or C.REEMBED_TOPK}", flush=True)
     print(f"[provenance] {resolved_system(a)}", flush=True)
     M = ExciseMethod(reembed_lora=a.reembed_lora, finder_ckpt=a.finder, device=a.device, thr=a.thr)
+    M.first_stage = getattr(a, "first_stage", "index")
     if getattr(a, "reembed_cache_gb", None) is not None:
         M._rc_budget = int(float(a.reembed_cache_gb) * 1e9)
     print(f"[arm] re-embed cache budget {M._rc_budget/1e9:.2f} GB"

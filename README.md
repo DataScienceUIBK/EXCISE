@@ -21,7 +21,7 @@
   <a href="#installation">Installation</a> ·
   <a href="#quick-start">Quick start</a> ·
   <a href="#training">Training</a> ·
-  <a href="#competitors">Competitors</a> ·
+  <a href="#baselines">Baselines</a> ·
   <a href="#data">Data</a> ·
   <a href="#citation">Citation</a>
 </p>
@@ -46,7 +46,7 @@ Each query asks for a topic X while ruling out one or two topics Z, and comes wi
 | T2 implicit | has no cue; the exclusion is carried by framing, e.g. *"with the European heavyweight title already covered"* | 569 |
 | T3 compound | rules out two topics | 598 |
 
-Train and test share no document, passage, query or pair.
+Training and test data share no query and no document.
 
 ## Results
 
@@ -54,11 +54,11 @@ Pooled exclusion success@10 over the 1,860 test queries (Table 1 of the paper). 
 
 | System | Re-index? | Reason-ModernColBERT | GTE-ModernColBERT-v1 | ColBERTv2.0 |
 |---|---|---|---|---|
-| Frozen ColBERT | no | 0.2011 | 0.1608 | 0.2323 |
-| LoRA fine-tune | **yes** | 0.5564 | 0.0887 | 0.5269 |
-| Full fine-tune | **yes** | 0.5027 | 0.1209 | 0.5102 |
-| Query-only fine-tune | no | 0.4360 | 0.5484 | 0.5038 |
-| **EXCISE** | no | 0.7731 | 0.7403 | 0.6925 |
+| Frozen ColBERT | no | 0.2011 | 0.1608 | 0.2301 |
+| LoRA fine-tune | **yes** | 0.5774 | 0.5823 | 0.5489 |
+| Full fine-tune | **yes** | 0.5323 | 0.5263 | 0.5317 |
+| Query-only fine-tune | no | 0.5806 | 0.5016 | 0.4608 |
+| **EXCISE** | no | 0.7731 | 0.7403 | 0.6995 |
 
 ## Installation
 
@@ -69,14 +69,13 @@ python scripts/download.py --what corpora         # the six collections, 3.2 GB,
 python scripts/download.py --what checkpoints     # the detectors and adapters, 25 MB  -> model/checkpoints/
 ```
 
-The corpora and checkpoints come from [mohammed933/EXCISE-corpora](https://huggingface.co/datasets/mohammed933/EXCISE-corpora) and [mohammed933/EXCISE-checkpoints](https://huggingface.co/mohammed933/EXCISE-checkpoints); both are private until publication, so run `hf auth login` first. `--tier baselines` and `--tier externals` add the competitors' checkpoints. The backbones and the BEIR datasets are downloaded into `HF_HOME` on first use.
+The corpora and checkpoints come from [mohammed933/EXCISE-corpora](https://huggingface.co/datasets/mohammed933/EXCISE-corpora) and [mohammed933/EXCISE-checkpoints](https://huggingface.co/mohammed933/EXCISE-checkpoints). `--tier baselines` and `--tier externals` add the checkpoints of the baselines and of the external systems. The backbones and the BEIR datasets are downloaded into `HF_HOME` on first use.
 
 ## Quick start
 
-Every run uses one GPU.
+Every run uses one GPU, with two exceptions: the Reason-ModernColBERT indexes of EUR-Lex and EDGAR do not fit on a single 94 GB GPU. The index is spread over all visible GPUs automatically; EUR-Lex ran with two GPUs visible and EDGAR with four.
 
 ```bash
-export EXCISE_ROOT=$PWD
 python -m excise.run --list                                                     # backbones, collections, systems
 python -m excise.run --backbone reason --dataset excluir --system excise --dry  # print the exact command
 for D in excluir fiqa trec-covid esgenius edgar eurlex; do
@@ -84,7 +83,7 @@ for D in excluir fiqa trec-covid esgenius edgar eurlex; do
 done
 ```
 
-The backbones are `reason`, `gte` and `colbertv2`. `excise.run` uses each backbone's document settings from the paper, and any extra flag (for example `--dump-orders FILE`) is passed to the evaluator. `excise.evaluate_beir` scores ordinary retrieval on SciFact, NFCorpus and ArguAna, and `excise.significance` compares two runs with a paired bootstrap.
+The backbones are `reason`, `gte` and `colbertv2`. `excise.run` uses each backbone's document settings from the paper (for ColBERTv2 it sets `EXCISE_DOC_LEN=300`; export that variable yourself when you call `excise.evaluate`, `excise.evaluate_beir` or a trainer directly), and any extra flag (for example `--dump-orders FILE`) is passed to the evaluator. `excise.evaluate_beir` scores ordinary retrieval on SciFact, NFCorpus and ArguAna, and `excise.significance` compares two runs with a paired bootstrap.
 
 ## Training
 
@@ -99,13 +98,36 @@ python -m excise.train_adapter --triples my_adapter_triples.jsonl --out model/ch
 
 For ColBERTv2 the detector uses `--lr 5e-4` and the adapter `--z-weight 2.0`; `excise/adopted.json` records every released checkpoint's arguments.
 
-## Competitors
+## Baselines
 
 The ColBERT baselines (`frozen`, `loraft`, `fullft`, `qonly`) run through `excise.run --system <name>`. The external retrievers and rerankers (BGE-large, E5-large, GTE-Qwen2, Promptriever, and the BGE and MiniLM rerankers) run through `competitors/`:
 
 ```bash
 python -m competitors.evaluate_external --model bge-rerank --ft model/checkpoints/bge-rerank --records 'data/benchmark/test/excluir/*.jsonl' --max-doc-words 10000 --window-words 350
-python -m competitors.train_external --model bge-rerank          # fine-tune on the same 1,900 retrieval triples
+python -m competitors.train_external --model bge-rerank --out model/checkpoints/my_bge-rerank   # fine-tune on the same 1,900 retrieval triples
+```
+
+The first command scores the released fine-tuned checkpoint (`scripts/download.py --what checkpoints --tier all`); pass the directory given to `--out` as `--ft` to score your own. Each released external checkpoint records its learning rate in `SELECTION.json`; pass it with `--lr` to retrain that model.
+
+## Test-time interventions
+
+`scripts/nine_interventions.py` scores the nine test-time interventions of Appendix A.3, and the plain MaxSim(Z) rule they replace, on the frozen Reason-ModernColBERT index. The excluded topic comes from the record, or from the released detector with `--detector-z`.
+
+```bash
+python scripts/nine_interventions.py --source excluir                # oracle Z
+python scripts/nine_interventions.py --source fiqa --detector-z      # the detector's Z
+```
+
+Two further scripts reproduce the analyses of Appendices A.3 and B.4. `scripts/zcond_shift.py` measures how prepending the excluded topic to a document changes its match to that topic, for the gold and for the excluded document. `scripts/verbatim_overlap.py` splits the test queries by whether the excluded document names the excluded topic verbatim, and reports success@10 for each group from saved per-query outcomes:
+
+```bash
+python scripts/zcond_shift.py --sources excluir fiqa
+for D in excluir fiqa; do
+  python scripts/nine_interventions.py --source $D --detector-z --dump-perquery nine_$D.jsonl
+  python -m excise.run --backbone reason --dataset $D --system excise --dump-orders excise_$D.jsonl
+done
+python scripts/verbatim_overlap.py --sources excluir fiqa --perquery nine_excluir.jsonl nine_fiqa.jsonl \
+    --arms maxsimz bm25z --orders EXCISE=excise_excluir.jsonl EXCISE=excise_fiqa.jsonl
 ```
 
 ## Data
@@ -118,7 +140,7 @@ python -m competitors.train_external --model bge-rerank          # fine-tune on 
 | `data/benchmark/train/adapter_triples.jsonl` | 2,627 | EXCISE's adapter data: the 1,900 triples plus 727 demotion triples, with Z labelled |
 | `data/benchmark/train/detector.jsonl` | 12,871 | the detector's queries |
 
-A test record holds the query, X, Z, the gold and excluded documents with their texts, and its tier. `data/benchmark/CORPUS_REQUIRED.json` pins each corpus by sha256.
+Every test and training record has the same nine fields: `id`, `source` (the collection), `tier`, `length`, `query`, `X` (the wanted topic), `Z` (a list, one entry per excluded topic), `pos_id` (the gold document) and `neg_ids` (one excluded document per entry of `Z`). Documents are linked by id; their text is in the collection's corpus. `data/benchmark/CORPUS_REQUIRED.json` pins each corpus by sha256.
 
 ## Repository layout
 
@@ -132,7 +154,7 @@ excise/                 the system
   config.py             paths and constants; the other files are the encoder, MaxSim, metrics and data loading
 competitors/            the external systems: training and evaluation
 data/benchmark/         X-BENCH
-scripts/                download.py, slurm_example.sh
+scripts/                download.py, nine_interventions.py, zcond_shift.py, verbatim_overlap.py, slurm_example.sh
 ```
 
 ## Citation

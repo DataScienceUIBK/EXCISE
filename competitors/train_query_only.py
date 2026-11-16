@@ -80,8 +80,11 @@ def main():
             b = idx[s:s + a.batch_size]
             feats = m.tokenize([rows[i]["query"] for i in b], is_query=True)
             feats = {k: (v.to(dev) if hasattr(v, "to") else v) for k, v in feats.items()}
-            qv = m(feats)["token_embeddings"].float()
-            qw = feats["attention_mask"].float()
+            # Score exactly as evaluation encodes a query (pylate ColBERT.encode): L2-normalised token vectors,
+            # every token kept under query expansion, otherwise the attended tokens.
+            qv = torch.nn.functional.normalize(m(feats)["token_embeddings"].float(), p=2, dim=-1)
+            qw = (torch.ones_like(feats["attention_mask"]) if getattr(m, "do_query_expansion", False)
+                  else feats["attention_mask"]).float()
             # in-batch contrastive: the gold of each query must outrank every other doc AND its own hard negative
             D = torch.cat([pv[b], nv[b]], 0); DM = torch.cat([pm[b], nm[b]], 0)
             sc = maxsim(qv, qw, D, DM)                                   # (B, 2B)

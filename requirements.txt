@@ -9,3 +9,5 @@ datasets==5.0.0
 huggingface-hub==0.36.2
 numpy==2.4.6
 safetensors==0.8.0
+scikit-learn==1.9.0
+pytrec_eval-terrier==0.5.10

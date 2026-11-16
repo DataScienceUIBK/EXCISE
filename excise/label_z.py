@@ -30,6 +30,11 @@ def main():
     with open(a.out, "w") as f:
         for r in out: f.write(json.dumps(r) + "\n")
     print(f"[labelz] {len(out)} rows -> {a.out}")
+    from excise.build_train import sha256_file
+    meta = {"builder": "excise.label_z", "rows": len(out), "sha256": sha256_file(a.out),
+            "records": [a.triples], "finder": a.finder, "thr": a.thr}
+    with open(a.out + ".meta.json", "w") as f: json.dump(meta, f, indent=2)
+    print(f"[labelz] provenance -> {a.out}.meta.json  (sha256 {meta['sha256'][:12]}…)")
     print(f"[labelz] detector silent on {silent} ({silent/len(out):.3f}); those fall back to the full query")
     print("LABELZ_DONE")
 

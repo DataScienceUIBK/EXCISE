@@ -38,7 +38,7 @@ def load_queries_with_ids(ds, limit=None):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--datasets", default="scifact,nfcorpus")
+    ap.add_argument("--datasets", default="scifact,nfcorpus,arguana")
     ap.add_argument("--split", default="test")
     ap.add_argument("--max-q", type=int, default=0, help='0 = all queries with qrels')
     ap.add_argument("--dump-perq", default="", help='write per-query nDCG@10 / fired flag as JSONL')

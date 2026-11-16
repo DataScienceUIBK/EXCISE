@@ -22,7 +22,7 @@ OPERATOR = ["--lam", "0.97", "--soft-demote", "--two-stage", "--ts-floor", "0.35
 
 BUDGET = {"reason":    {"EXCISE_CHUNK_WORDS": "512", "EXCISE_MAX_DOC_WORDS": "10000"},
           "gte":       {"EXCISE_QUERY_LEN": "128", "EXCISE_CHUNK_WORDS": "200", "EXCISE_MAX_DOC_WORDS": "1000"},
-          "colbertv2": {"EXCISE_QUERY_LEN": "128", "EXCISE_CHUNK_WORDS": "200", "EXCISE_MAX_DOC_WORDS": "1000"}}
+          "colbertv2": {"EXCISE_QUERY_LEN": "128", "EXCISE_DOC_LEN": "300", "EXCISE_CHUNK_WORDS": "200", "EXCISE_MAX_DOC_WORDS": "1000"}}
 
 def adopted():
     p = os.path.join(ROOT, "excise", "adopted.json")

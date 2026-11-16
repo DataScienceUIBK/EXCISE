@@ -43,26 +43,6 @@ class DocPadCollator:
         return b
 
 
-def build_triples(kind: str, seed: int):
-    from csli import data as D
-    if kind == "mixed":
-        groups = D.build_mixed_instruction_data(seed=seed)
-    elif kind == "anchored":
-        groups = D.build_mixed_large_anchor(seed=seed)
-    elif kind == "exclude":
-        groups = D.build_exclude_groups(0, D.N_TRAIN_EXCLUDE, templates=D.EXCLUDE_TEMPLATES_TRAIN)
-    else:
-        raise ValueError(kind)
-    rng = random.Random(seed)
-    q, p, n = [], [], []
-    for g in groups:
-        pos = rng.choice(g.positives); neg = rng.choice(g.negatives) if g.negatives else rng.choice(g.positives)
-        # standard instruction-tuning: prepend the instruction to the query
-        query = (g.instruction + " " + g.query).strip() if g.instruction else g.query
-        q.append(query); p.append(pos); n.append(neg)
-    return Dataset.from_dict({"query": q, "positive": p, "negative": n})
-
-
 def load_triples_jsonl_z(path: str):
     """Triples that carry a `z_query` column (excise/label_z.py)."""
     import json as _j
@@ -97,8 +77,6 @@ def main():
                     help='EFFECTIVE batch across all visible GPUs, not per-device')
     ap.add_argument("--lora-r", type=int, default=8)
     ap.add_argument("--full", action="store_true", help='FULL fine-tune the whole backbone (no LoRA adapter)')
-    ap.add_argument("--data", default="", choices=["", "mixed", "anchored", "exclude"],
-                    help='unused')
     ap.add_argument("--triples", default=C.BASELINE_TRIPLES,
                     help='the (query, positive, negative) training file')
     ap.add_argument("--seed", type=int, default=0)
@@ -112,11 +90,10 @@ def main():
                     help='train on triples with no provenance sidecar (you are asserting you know what this file is)')
     a = ap.parse_args()
     os.makedirs(a.out, exist_ok=True)
-    if not a.data:                                     # the --triples path is the NEW multi-source data
-        from excise.build_train import read_provenance
-        meta = read_provenance(a.triples, require=not a.allow_unverified)
-        if meta: print(f"[pyft] data provenance: {meta['builder']} rows={meta['rows']} "
-                       f"records={[os.path.basename(r) for r in meta['records']]}", flush=True)
+    from excise.build_train import read_provenance
+    meta = read_provenance(a.triples, require=not a.allow_unverified)
+    if meta: print(f"[pyft] data provenance: {meta['builder']} rows={meta['rows']} "
+                   f"records={[os.path.basename(r) for r in meta['records']]}", flush=True)
 
     m = models.ColBERT(MODEL, model_kwargs={"attn_implementation": "sdpa"})
     m.document_length = 256   # fixed length -> uniform doc padding (avoids PyLate's
@@ -134,8 +111,8 @@ def main():
         if "z_query" not in ds.column_names:
             raise SystemExit("--z-margin needs a z_query column; build it with excise/label_z.py")
     else:
-        ds = build_triples(a.data, a.seed) if a.data else load_triples_jsonl(a.triples)
-    print(f"[pyft] data={a.data or a.triples} triples={len(ds)} trainable={n_tr} full={a.full} "
+        ds = load_triples_jsonl(a.triples)
+    print(f"[pyft] data={a.triples} triples={len(ds)} trainable={n_tr} full={a.full} "
           f"z_margin={a.z_margin} z_weight={a.z_weight} cols={ds.column_names}", flush=True)
 
     _base = losses.Contrastive(model=m)

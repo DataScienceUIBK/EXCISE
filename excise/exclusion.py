@@ -79,6 +79,8 @@ class ExciseMethod:
         self._rc = _OD(); self._rc_bytes = 0
         self._rc_budget = int(float(os.environ.get("EXCISE_REEMBED_CACHE_GB", "4.0")) * 1e9)  # ON by default
         self.chunk2doc = None; self.n_docs = 0                  # long-doc chunking (None => 1 chunk == 1 doc)
+        self.q_enc = self.mv                                    # first-stage query encoder; index() sets it
+        self.first_stage = "index"                              # "index": query with the encoder that built the index; "frozen": always the frozen encoder
 
     @torch.no_grad()
     def index(self, corpus, doc_chunk=2048, precompute_lora=True, index_with_lora=False, verbose=True):
@@ -108,6 +110,7 @@ class ExciseMethod:
             doc_chunk = min(doc_chunk, 512)
         self.corpus, self.doc_chunk, self.van = corpus, doc_chunk, []
         enc_idx = self.ml if index_with_lora else self.mv
+        self.q_enc = enc_idx if self.first_stage == "index" else self.mv   # see --first-stage
         reuse = enc_idx is self.ml
         self.lor = [] if (precompute_lora and not reuse) else None
         n = len(corpus)
@@ -391,7 +394,7 @@ class ExciseMethod:
         """Return (ordered_doc_ids, info)."""
         if self.van is None: raise RuntimeError("ExciseMethod.index(corpus) must be called before rank()")
         topk = topk or C.REEMBED_TOPK; lam = C.DEMOTE_LAM if lam is None else lam
-        qvv, qmv = emb(self.mv, [query], True, self.dev)
+        qvv, qmv = emb(self.q_enc, [query], True, self.dev)
         base = torch.cat([maxsim(qvv.float().to(Dv.device), qmv.float().to(Dv.device),
                                  Dv.float(), Dm)[0].to(self.dev) for Dv, Dm in self.van])
         cand, ids = self._select(base, topk)     # cand = CHUNK idx (gather), ids = DOC idx (return); equal if no chunking

@@ -12,6 +12,9 @@ from excise.lora_targets import detect_lora_targets
 
 MODEL = C.BACKBONE                                              # lightonai/Reason-ModernColBERT
 _QL = {"query_length": C.BACKBONE_QUERY_LEN} if C.BACKBONE_QUERY_LEN else {}   # colbertv2 native q-len 32 -> bump for fair long queries
+# ColBERTv2 ships doc_maxlen=180 in its metadata, shorter than the 200-word chunks it is given; EXCISE_DOC_LEN
+# (run.py sets 300 for it, the length the paper states) keeps the whole chunk.
+_DL = {"document_length": int(os.environ["EXCISE_DOC_LEN"])} if os.environ.get("EXCISE_DOC_LEN") else {}
 
 
 def _load_checked(module, sd, what):
@@ -26,7 +29,7 @@ def _load_checked(module, sd, what):
 
 
 def load_model(lora_path, device):
-    m = models.ColBERT(MODEL, model_kwargs={"attn_implementation": "sdpa"}, **_QL)
+    m = models.ColBERT(MODEL, model_kwargs={"attn_implementation": "sdpa"}, **_QL, **_DL)
     if hasattr(m, "_input_length") and not hasattr(m, "_text_length"): m._text_length = m._input_length
     elif hasattr(m, "_text_length") and not hasattr(m, "_input_length"): m._input_length = m._text_length
     if lora_path:

@@ -57,10 +57,3 @@ def recall_at_k(order_ids, rel, k=100):
     if not R: return 0.0
     top = {int(d) for d in order_ids[:k]}
     return len(R & top) / len(R)
-
-
-def difficulty_bin(diff):
-    """Slice axis from the recorded base-retriever gap (gap<=0 => the base already prefers a negative)."""
-    g = (diff or {}).get("bm25_gap")
-    if g is None: return "na"
-    return "hard" if g <= 0 else ("med" if g <= 2.0 else "easy")
